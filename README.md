@@ -8,12 +8,12 @@ As this is such a lightweight bot, I plan on running this code off of a headless
 
 ## Technology Used (So far)
 
-###Software
+### Software
 
 * Discord API
 * Python
 
-###Hardware
+### Hardware
 
 * Raspberry Pi Zero (2017)
 

@@ -9,16 +9,16 @@ import os
 load_dotenv()
 
 intents = discord.Intents.all()
-client = discord.Client(intents=intents)
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 userIDDictionary = {}
 
 @tasks.loop(hours = 1)
 async def monthCheckLoop():
     #find general channel to post to
-    genChannel = client.get_channel(os.getenv("SERVER_CHANNEL_ID"))
-    if (datetime.now().day == 1):
-        await genChannel.send("It is a new month, and you know what that means. Pay your fucking rent, by using `!payRent`.")
+    genChannel = discord.Client(intents=discord.Intents.all()).get_channel(os.getenv("SERVER_CHANNEL_ID"))
+    #Check for first of the month, post msg at Noon (local to bot timezone)
+    if (datetime.now().day == 1 and datetime.now().hour == 12):
+        await genChannel.send("@here It's a new month, and you know what that means. Pay your fucking rent by using `!payRent`.")
         #Ban everyone in userIDDictionary
         for member in userIDDictionary:
             if userIDDictionary[member.id] == False:
@@ -26,9 +26,9 @@ async def monthCheckLoop():
         #Re-falsify all members
         for member in userIDDictionary:
            userIDDictionary[member.id] = False 
-    #2 week reminder
+    #2 week reminder, msg at Noon
     #Add formatted list of people who haven't paid
-    if (datetime.now().day == 15):
+    if (datetime.now().day == 15 and datetime.now().hour == 12):
         await genChannel.send("@everyone ATTENTION ALL RENTOIDS: Rent's due. If you haven't paid, use command `!payRent` to pay your fucking rent.")
               
 @bot.event
@@ -46,10 +46,10 @@ async def on_ready():
     brief="Greets the user"
 )
 async def hello(ctx):
-    if ctx.message.author.id != os.getenv("SERVER_OWNER_ID"):
-        await ctx.message.channel.send("Fuck off, rentoid")
-    else:
+    if ctx.message.author.id == int(os.getenv("SERVER_OWNER_ID")):
         await ctx.message.channel.send("Hello `land-daddy` :)")
+    else:
+        await ctx.message.channel.send("Fuck off, rentoid")
 
 @bot.command(
     help="Check if you have paid your rent for the month",
@@ -63,7 +63,7 @@ async def rentStatus(ctx):
 
 @bot.command(
     help="Pay your rent for the month with this command",
-    brief="to pay rent"
+    brief="Pays user rent"
 )
 async def payRent(ctx):
     if userIDDictionary[ctx.message.author.id]:
